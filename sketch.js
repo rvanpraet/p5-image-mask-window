@@ -36,7 +36,7 @@ function setup() {
 }
 
 function draw() {
-	push()
+	// push()
 	if (!fadingOut) {
 		image(mainImg, 0, 0)
 		!mouseOutBounds() && drawMask(maskSize)
@@ -45,8 +45,8 @@ function draw() {
 			clearInterval(fadeOutId)
 			fadingOut = false
 			fadeOutCounter = 0
-			swapImages()
 			fadingIn = true
+			swapImages()
 			fadeInId = setInterval(() => {
 				fadeInCounter += 10
 			})
@@ -54,7 +54,7 @@ function draw() {
 		tint(255, fadeOutCounter)
 		image(maskImg, 0, 0)
 	}
-	pop()
+	// pop()
 	fr.html(floor(frameRate()))
 }
 
@@ -104,11 +104,9 @@ function drawMask(r) {
 		const radius = x + 20 * pulseOff
 
 		// Draw on mask graphic
-		push()
 		circleMask.translate(t, t)
 		circleMask.fill(0, 0, 0, a)
 		circleMask.ellipse(floor(x/2), floor(x/2), radius + 20 * sin(cycle), radius + 20 * cos(cycle))
-		pop()
 
 		counter++
 	}
@@ -120,12 +118,12 @@ function drawMask(r) {
 	img.mask(circleMask)
 
 	// Translate to put cursor in the middle
-	push()
+	// push()
 	translate(r/2, r/2)
-	// fadingOut && tint(255, 1 / fadeOutCounter)
-	// fadingIn && tint(255, fadeInCounter)
+	fadingOut && tint(255, 1 / fadeOutCounter)
+	fadingIn && tint(255, fadeInCounter)
 	image(img, xStart, yStart)
-	pop()
+	// pop()
 	if (fadeInCounter >= 255) {
 		fadingIn = false
 		fadeInCounter = 0
