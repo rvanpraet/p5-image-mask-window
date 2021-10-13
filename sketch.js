@@ -5,15 +5,8 @@ let maskImg
 let origW
 let origH
 let imgAR
-let maskSize = 600
+let maskSize = 600 // To change size of the circleMask -- maybe make this dependent on the container ratio
 let flipped = false
-let fadingOut = false // After swapping image, the masking lens is faded back in
-let fadeOutCounter = 0
-let fadeOutId
-let fadingIn = false
-let fadeInCounter = 0
-let fadeInId
-let isResizing = false
 let debounceId = null
 let fr
 
@@ -36,39 +29,23 @@ function setup() {
 }
 
 function draw() {
-	// push()
-	if (!fadingOut) {
-		image(mainImg, 0, 0)
-		!mouseOutBounds() && drawMask(maskSize)
-	} else {
-		if (fadeOutCounter >= 50) {
-			clearInterval(fadeOutId)
-			fadingOut = false
-			fadeOutCounter = 0
-			fadingIn = true
-			swapImages()
-			fadeInId = setInterval(() => {
-				fadeInCounter += 10
-			})
-		}
-		tint(255, fadeOutCounter)
-		image(maskImg, 0, 0)
-	}
-	// pop()
+	push()
+	image(mainImg, 0, 0)
+	!mouseOutBounds() && drawMask(maskSize)
+	pop()
 	fr.html(floor(frameRate()))
 }
 
 function mousePressed() {
-	if (fadingOut) return
 	if (!mouseOutBounds()) {
-		fadingOut = true
-		fadeOutId = setInterval(() => {
-			fadeOutCounter++
-		}, 1)
+		noLoop()
+		swapImages()
+		loop()
 	}
 }
 
 function windowResized() {
+	// If you need a resize debouncer for performance
 	// if (debounceId !== null) clearTimeout(debounceId)
 	// debounceId = setTimeout(() => {
 		onResize()
@@ -88,12 +65,11 @@ function drawMask(r) {
 
 	// Create mask canvas
 	const circleMask = createGraphics(r + 60, r + 60)
-	// if (flipping || fading) circleMask.noStroke()
 	circleMask.noStroke()
 	const cycle = frameCount / 200
 
 
-	const newR = r - 100
+	const newR = r - 50
 	const coef = 12
 	let counter = 0
 	// Draw circles with different alpha values and animate them
@@ -104,10 +80,11 @@ function drawMask(r) {
 		const radius = x + 20 * pulseOff
 
 		// Draw on mask graphic
+		push()
 		circleMask.translate(t, t)
 		circleMask.fill(0, 0, 0, a)
 		circleMask.ellipse(floor(x/2), floor(x/2), radius + 20 * sin(cycle), radius + 20 * cos(cycle))
-
+		pop()
 		counter++
 	}
 
@@ -118,18 +95,10 @@ function drawMask(r) {
 	img.mask(circleMask)
 
 	// Translate to put cursor in the middle
-	// push()
+	push()
 	translate(r/2, r/2)
-	fadingOut && tint(255, 1 / fadeOutCounter)
-	fadingIn && tint(255, fadeInCounter)
 	image(img, xStart, yStart)
-	// pop()
-	if (fadeInCounter >= 255) {
-		fadingIn = false
-		fadeInCounter = 0
-		flipped = !flipped
-		clearInterval(fadeInId)
-	}
+	pop()
 	circleMask.remove()
 }
 
@@ -163,6 +132,7 @@ function swapImages() {
 	const maskCopy = maskImg
 	maskImg = mainCopy
 	mainImg = maskCopy
+	flipped = !flipped
 }
 
 // Helper Functions
